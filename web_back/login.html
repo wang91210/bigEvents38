@@ -9,6 +9,10 @@
     <link rel="stylesheet" type="text/css" href="css/reset.css">
     <link rel="stylesheet" type="text/css" href="css/iconfont.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
+    <script src="./js/jquery-1.12.4.min.js"></script>
+    <!-- 引入bootcss.的css样式 -->
+    <link rel="stylesheet" href="../web_back/js/bootstrap/css/bootstrap.min.css">
+    <script src="../web_back/js/bootstrap/js/bootstrap.min.js"></script>
 </head>
 
 <body>
@@ -26,38 +30,76 @@
                 <input type="text" class="input_txt" placeholder="邮箱/手机号">
                 <input type="password" class="input_pass" placeholder="密码">
                 <input type="submit" class="input_sub" value="登 录">
+                <!-- input_sub有一个提交跳转事件 -->
             </form>
         </div>
-    </div> 
-    <script src="./js/jquery-1.12.4.min.js"></script>
+    </div>
+
+    <!-- 模态框 -->
+    <!-- Button trigger modal -->
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">温馨提示</h4>
+                </div>
+                <div class="modal-body">
+                    <!-- 这里写要输入的提示 -->
+                    <!-- ...不能写死 -->
+                </div>
+                <div class="modal-footer">
+                    <!-- 第一框可以消失， -->
+                    <!-- 第二个不可以消失 -->
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 模态框结束 -->
+
+
     <script>
-      //需求：用户登录
-      //1.给登录input_sub注册点击事件
-        $('.input_sub').on('click',function(e){
+        //需求：用户登录
+        //1.给登录input_sub注册点击事件
+        $('.input_sub').on('click', function (e) {
             //2登录按钮是一个from表单有一个submit,所以要默认去掉他的跳转
+            // input_sub有一个提交跳转事件 
             e.preventDefault();
             //2.获取用户输入的用户名和密码，去掉前后空格，trim()
-            var username=$('.input_txt').val().trim();
-             var password=$('.input_pass').val().trim();
+            var username = $('.input_txt').val().trim();
+            var password = $('.input_pass').val().trim();
             //3.判断是否为空
-            if(username==''||password==''){
-                alert('兄弟用户名和密码为空')
+            if (username == '' || password == '') {
+                // alert('兄弟用户名和密码为空')
+                // 引入要调用这个方法
+                $('.modal-body').text('兄弟用户名和密码为空')
+                $('#myModal').modal({ 
+                    keyboard: false
+                })
                 return;
             }
-            
+
             $.ajax({
                 type: 'post',
                 url: 'http://localhost:8080/admin/user/login',
                 data: {
-                    username:username,
-                    password:password
+                    username: username,
+                    password: password
                 },
-                success:function(backData){
+                success: function (backData) {
                     //如果登录成功
-                    if(backData.code==200){
-                        window.location.href='index.html'
-                    }else{
-                        alert('账号和密码错误了')
+                    if (backData.code == 200) {
+                        window.location.href = 'index.html'
+                    } else {
+                        // alert('账号和密码错误了')
+                        $('.modal-body').text('账号和密码错误了')
+                        $('#myModal').modal({
+                            keyboard: false
+                        })
                     }
                 }
             })
