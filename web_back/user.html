@@ -22,49 +22,145 @@
         <div class="container-fluid common_con">
             <form class="form-horizontal article_form">
                 <div class="form-group">
-                    <label for="inputEmail3" class="col-sm-2 control-label">用户名称：</label>
+                    <label for="inputEmail3" class="col-sm-2 control-label ">用户名称：</label>
                     <div class="col-sm-4">
-                        <input type="text" class="form-control" id="inputEmail3" value="李思思">
+                        <input type="text" name="username" class="form-control username" value="李思思">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">昵称：</label>
                     <div class="col-sm-4">
-                        <input type="text" class="form-control" id="inputEmail3" value="思思">
+                        <input type="text" name="nickname" class="form-control nickname" value="思思">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">邮箱：</label>
                     <div class="col-sm-4">
-                        <input type="text" class="form-control" id="inputEmail3" value="lisisi@126.com">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="inputPassword3" class="col-sm-2 control-label">用户图标：</label>
-                    <div class="col-sm-10">
-                        <img src="images/2.jpg" alt="" class="user_pic">
-                        <input type="file" id="exampleInputFile">
+                        <input type="text" name="email" class="form-control email" value="lisisi@126.com">
                     </div>
                 </div>
 
                 <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label">密码：</label>
-                        <div class="col-sm-4">
-                            <input type="password" class="form-control" id="inputEmail3" value="12345678">
-                        </div>
+                    <label for="inputPassword3" class="col-sm-2 control-label">用户图标：</label>
+                    <div class="col-sm-10">
+                        <img src="images/2.jpg" alt="" class="user_pic " id="userPic">
+                        
+                        <!-- 这里设置上传 图片的按钮的 -->
+                        <br>
+                        <label for="exampleInputFile">
+                            <img src="./images/uploadFileIcon.png" alt="">
+                        </label>
+                        <!-- 一般工作不用整个默认的上传文件的标签，因为太丑，就把他要隐藏 -->
+                        <input type="file" style="display: none"   id="exampleInputFile" name="userPic">
                     </div>
-               
-    
+                </div>
+
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">密码：</label>
+                    <div class="col-sm-4">
+                        <input type="password" name="password" class="form-control password" value="12345678">
+                    </div>
+                </div>
+
+
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-success">修改</button>
+                        <!-- 这个btn-success是一修改颜色是属性，所以我们自己加了一个类名 btn-edit -->
+                        <button type="submit" class="btn btn-success  btn-edit">修改</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 
+    <script>
+        //获取用户信息
+        $(function () {
+            //需求完成头像预览
+            //1.给input：file设置一个值改变事件 change事件
+            $('#exampleInputFile').on('change', function () {
+                //2.通过this.files[0]获取选中的这个文件.this是dom对象
+                var FileIcon = this.files[0];
+                //3.通过URL.creatObjectURL(),创建一个url
+                var url = URL.createObjectURL(FileIcon)
+                //4把这个创建的的url交给用来做预览的的img的src
+                $('.user_pic').attr('src', url);
+            })
+            //1.一进到首页，就应该发送ajax请求，获取用户信息(个人图片和昵称)
+            $.ajax({
+                type: 'get',
+                url: 'http://localhost:8080/admin/user/detail',
+                success:function (backData) {
+                    console.log(backData)
+                    // $('input.username').val(backData.data.username);
+                    // $('input.nickname').val(backData.data.nickname);
+                    // $('input.email').val(backData.data.email)
+                    // $('input.password').val(backData.data.password);
+
+                    for (var key in backData.data) {
+                        $('input.' + key).val(backData.data[key]);
+                    }
+
+                    $('img.user_pic').attr('src', backData.data.userPic);
+                }
+            })
+
+
+
+
+            //需求：修改个人信息
+            //1.给修改按钮注册事件
+            $('.btn-edit').on('click',function(e) {
+                e.preventDefault();
+                //2.创建一个formData对象
+                var fd = new FormData($('form')[0]);
+               
+                // console.log(fd);
+                //3.发送ajax请求 
+                $.ajax({
+                    type: 'post',
+                    url: 'http://localhost:8080/admin/user/edit',
+                    data: fd, //传递的参数是一个fromData对象
+                    contentType: false,
+                    processData: false,
+                    // 这里写错了
+                    // propsData: false,
+                    success: function (backData) {
+                        console.log(backData)
+                        if (backData.code == 200){
+                            alert('修改成功')
+                            // window.location.reload()
+                            //解决方案二
+                            //获取用户信息
+                            //1.发送ajax请求
+                            $.ajax({
+                                type: 'get',
+                                url: 'http://localhost:8080/admin/user/info',
+                                success: function(backData) {
+                                    console.log(backData)
+                                    //判断
+                                    if (backData.code == 200) {
+                                        //2.把对应的信息显示在页面的标签上
+                                        // 'src' 就是取里面的值
+                                        // 加在父亲的的身上
+                                        parent.$('.user_info>img').attr('src', backData
+                                            .data.userPic)
+                                        parent.$('.user_info>span').html(
+                                            '欢迎&nbsp;&nbsp' + backData.data
+                                            .nickname)
+                                        parent.$('.user_center_link>img').attr('src',
+                                            backData.data.userPic)
+                                    }
+                                }
+
+                            })
+                        }
+
+                    }
+                })
+            })
+        })
+    </script>
 </body>
 
 </html>
